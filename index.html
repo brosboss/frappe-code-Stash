@@ -1,0 +1,173 @@
+<!-- jinja -->
+<head><title>DARRR</title></head>
+<h2>Ongoing Regular Recruit Intake Applications</h2>
+<br/>
+{% if user_application %}
+{% set user_application = user_application[0] %}
+<span class="hidden" id="appName">{{user_application['name']}}</span><span class="hidden" id="appType">{{app_type}}</span>
+<div class="card card-default">
+	<div class="card-header">
+		<h4><strong><u id="appNo">{{user_application['name']}}</u></strong></h4>
+	</div>
+	<div class="card-body">
+	{% if user_application['recruitment_status'] == 'Pending' %}
+		<p>You have already initialized a Recruitment application.</p>
+		<p class="test-danger">Please select an appropriate action below. You will not be able to edit your application once submitted</p>
+	{% else %}
+		<p>You application has been submitted.</p>
+	{% endif %}
+	</div>
+
+	<div class="modal-footer">
+		{% if user_application['recruitment_status'] == 'Pending' %}
+		<a class="btn btn-primary text-white" href="/darrr/recruitment-application-form"><span class="fa fa-play"></span> Continue Application</a>
+		{% endif %}
+		<a class="btn btn-secondary text-white" href="/printview?doctype=Recruitment%20Application&name={{user_application['name']}}&format=DARRR%20Recruitment%20Format"><span class="fa fa-print"></span> Print Application</a>
+		{% if user_application['recruitment_status'] == 'Pending' %}
+		<a class="btn btn-success text-white" data-toggle="modal" data-target="#submitApplicationModal"><span class="fa fa-check"></span> Submit Application</a>
+		{% endif %}
+	</div>
+</div>
+
+<div class="modal" id="submitApplicationModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+		<div class="modal-header">
+			<h3 class="modal-title">Notice</h3>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body">
+			<p class="text-danger">You are about to submit your application. This action can not be reversed and you will no longer be able to edit your application. However, you can still print your application after this action.<p/>
+			<p><input type="checkbox" id="declaration"> I declare that the information to be submitted is complete and accurate and I understand that any misrepresentation may result in the denial or cancellation of application.<p>
+		</div>
+		<div class="modal-footer">
+			<button type="button" id="submitBtn" class="btn btn-primary text-white" disabled>Submit</button>
+		</div>
+		</div>
+	</div>
+</div>
+{%endif%}
+
+{% set disclaimer_head = 'I have read the instructions and understand them.' %}
+
+{% set disclaimer_notice = 'Note that once you submit an application, you will not be able to revert the action.' %}
+{% set disclaimer_agreement = 'By checking this box, I agree that I understand the requirements for this Application.' %}
+{% set disclaimer_warning = 'If you do still have any doubts please go back to read through the requirements' %}
+
+{% if regular_intake_applications and not user_application %}
+	{% for item in regular_intake_applications %}
+		<div id="course{% print item['name'].replace("/", "-") %}" class="card card-default">
+			<div class="card-header"><h4><strong><u>{{item['intake_name']}}</u></strong></h4></div>
+			<div class="card-body">
+				<p>{{item['entry_requirements']}}</p>
+				<h3>Requirements</h3>
+				<table class="table">
+					<tr><td><b>Minimium Age (Non - Trades)</b></td><td>{{item['minimum_age']}}</td></tr>
+					<tr><td><b>Maximium Age (Non - Trades)</b></td><td>{{item['maximum_age']}}</td></tr>
+					<tr><td><b>Minimium Age (Trades)</b></td><td>{{item['minimum_age_trades']}}</td></tr>
+					<tr><td><b>Maximium Age (Trades)</b></td><td>{{item['maximum_age_trades']}}</td></tr>
+					<tr><td><b>Minimium Height (Male)</b></td><td>{{item['minimum_height_male']}}</td></tr>
+					<tr><td><b>Minimium Height (Female)</b></td><td>{{item['minimum_height_female']}}</td></tr>
+					<tr><td><b>Minimium Educational Qualification</b></td><td>{{item['minimum_educational_qualification']}}</td></tr>
+					<tr><td><b>Application Period</b></td><td>{{item['from'].strftime('%-d %b %y') }} - {{item['to'].strftime('%-d %b %y') }}</td></tr>
+				</table>
+				<button type="button" data-toggle="modal" data-target="#militaryModal{% print item['name'].replace("/", "-") %}" class="btn btn-primary">Apply Now</button>
+				<div class="modal apply-modal" id="militaryModal{% print item['name'].replace("/", "-") %}" tabindex="-1" role="dialog">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">{{item['course_name']}}</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<h3>DISCLAIMER</h3>
+							<p>{{disclaimer_head}}<p/>
+							<p class="text-danger">{{disclaimer_notice}}<p>
+							<p>{{disclaimer_warning}}<p>
+							<p><input type="checkbox" class="disclaimerCheckbox" value="0">{{disclaimer_agreement}}<p>
+							<p style="font-size:22px"><strong>Have you served/serving in the Armed Forces of Nigeria ?</strong></p>
+						</div>
+						<div class="modal-footer">
+							<a href="/darrr/recruitment-application-form?new=1&intake={{item['name']}}&afn_service=Yes" type="button" class="btn btn-primary serving-pers-option disabled">Yes, I Have</a>
+							<a href="/darrr/recruitment-application-form?new=1&intake={{item['name']}}" class="btn btn-secondary serving-pers-option disabled" >No, I have not</a>
+						</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<br/>
+	{% endfor %}
+{% else %}
+{% if not user_application %}
+<div class="panel panel-default">
+  <div class="panel-body">No ongoing application</div>
+</div>
+{% endif %}
+{% endif %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+var checkboxes = document.getElementsByTagName('input');
+
+for (var i=0; i<checkboxes.length; i++)  {
+  if (checkboxes[i].type == 'checkbox')   {
+    checkboxes[i].checked = false;
+  }
+}
+
+$('.disclaimerCheckbox').click(function() {
+	console.log($('.disclaimerCheckbox').is(":checked"))
+	if ($('.disclaimerCheckbox').is(":checked"))
+	{
+		$(".serving-pers-option").toggleClass('disabled');
+	}
+	else{
+		$(".serving-pers-option").toggleClass('disabled');
+	}
+	//$(".service-status").toggle(this.checked);
+});
+
+$('#declaration').click(function() {
+	if ($('#declaration').is(":checked"))
+	{
+		$("#submitBtn").prop('disabled', false);
+	}
+	else{
+		$("#submitBtn").prop('disabled', true);
+	}
+});
+
+$(function () {
+	$("#submitBtn").click(function(e) {
+		var appName = $("#appName").text().trim()
+		console.log(appName+appType)
+		$('#submitApplicationModal').modal('toggle');
+
+		frappe.call({
+			method: "nadigmap.api.submit_recruitment_application",
+			args: {
+				application_name: appName,
+			},
+			freeze: true,
+			callback: (response) => {
+				name = response.message
+				frappe.msgprint('Application Submitted')
+				refresh() 
+			},
+			error: (r) => {
+				frappe.msgprint('Application not Submitted')
+			}
+		});   
+	}); 
+});
+
+function refresh(){
+	var re = new RegExp(/^.*\//); // regex to get base url
+	var url = re.exec(window.location.href);
+	window.location.href = url+'darrr';
+}
+</script>
